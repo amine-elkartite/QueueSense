@@ -1,0 +1,3 @@
+import { z } from 'zod';
+const boolish=z.preprocess(v=>v==='true'?true:v==='false'?false:v,z.boolean()).optional();
+export const searchSchema=z.object({body:z.any().optional(),params:z.object({}).passthrough(),query:z.object({query:z.string().optional(),category:z.string().optional(),city:z.string().optional(),latitude:z.coerce.number().optional(),longitude:z.coerce.number().optional(),radius:z.coerce.number().positive().default(10),maxWaitTime:z.coerce.number().min(0).optional(),crowdLevel:z.enum(['LOW','MODERATE','HIGH','VERY_HIGH']).optional(),openNow:boolish,page:z.coerce.number().int().positive().default(1),limit:z.coerce.number().int().min(1).max(100).default(20),sort:z.enum(['distance','wait_time']).optional()})});

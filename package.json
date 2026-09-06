@@ -1,0 +1,17 @@
+{
+  "name": "queuesense",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["api", "dashboard"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w api\" \"npm run dev -w dashboard\"",
+    "build": "npm run build -w api && npm run build -w dashboard",
+    "test": "npm run test -w api",
+    "lint": "npm run lint -w api && npm run lint -w dashboard",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w dashboard",
+    "prisma:generate": "npm run prisma:generate -w api",
+    "prisma:push": "npm run prisma:push -w api",
+    "seed": "npm run seed -w api"
+  },
+  "devDependencies": {"concurrently": "^9.1.2"}
+}

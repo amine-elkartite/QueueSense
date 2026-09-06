@@ -1,0 +1,207 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "mysql" url = env("DATABASE_URL") }
+
+enum Role { ADMIN BUSINESS DEVELOPER }
+enum UserStatus { ACTIVE SUSPENDED DISABLED }
+enum CrowdLevel { LOW MODERATE HIGH VERY_HIGH }
+enum QueueSource { BUSINESS SYSTEM ADMIN SENSOR }
+enum PredictionType { CURRENT IN_30_MIN IN_1_HOUR CUSTOM }
+enum SubscriptionStatus { ACTIVE CANCELED EXPIRED PAST_DUE }
+enum IncidentType { OUTAGE STAFF_SHORTAGE EMERGENCY CLOSURE HIGH_DEMAND OTHER }
+
+model User {
+  id String @id @default(cuid())
+  firstName String
+  lastName String
+  email String @unique
+  passwordHash String
+  role Role
+  status UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  businesses Business[]
+  apiKeys ApiKey[]
+  subscriptions Subscription[]
+  reviews Review[]
+  refreshTokens RefreshToken[]
+  @@index([role, status])
+}
+
+model Business {
+  id String @id @default(cuid())
+  ownerId String
+  name String
+  description String? @db.Text
+  logo String?
+  website String?
+  phone String?
+  verified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  locations Location[]
+  @@index([ownerId])
+  @@index([verified])
+}
+
+model Category {
+  id String @id @default(cuid())
+  name String @unique
+  slug String @unique
+  icon String?
+  locations Location[]
+}
+
+model Location {
+  id String @id @default(cuid())
+  businessId String
+  categoryId String
+  name String
+  address String
+  city String
+  country String @default("Morocco")
+  latitude Decimal @db.Decimal(10,7)
+  longitude Decimal @db.Decimal(10,7)
+  timezone String @default("Africa/Casablanca")
+  averageServiceTime Int @default(5)
+  capacity Int @default(30)
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  snapshots QueueSnapshot[]
+  predictions QueuePrediction[]
+  openingHours OpeningHour[]
+  reviews Review[]
+  incidents Incident[]
+  @@index([businessId])
+  @@index([categoryId])
+  @@index([city, active])
+  @@index([latitude, longitude])
+}
+
+model QueueSnapshot {
+  id String @id @default(cuid())
+  locationId String
+  peopleWaiting Int
+  peopleBeingServed Int
+  averageServiceTime Int
+  estimatedWaitTime Int
+  crowdLevel CrowdLevel
+  source QueueSource @default(BUSINESS)
+  recordedAt DateTime @default(now())
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@index([locationId, recordedAt])
+  @@index([recordedAt])
+}
+
+model QueuePrediction {
+  id String @id @default(cuid())
+  locationId String
+  predictionType PredictionType
+  predictedWaitTime Int
+  confidence Float
+  predictedFor DateTime
+  createdAt DateTime @default(now())
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@index([locationId, predictedFor])
+}
+
+model OpeningHour {
+  id String @id @default(cuid())
+  locationId String
+  dayOfWeek Int
+  openTime String
+  closeTime String
+  closed Boolean @default(false)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@unique([locationId, dayOfWeek])
+}
+
+model ApiKey {
+  id String @id @default(cuid())
+  userId String
+  name String
+  keyHash String @unique
+  keyPrefix String
+  active Boolean @default(true)
+  lastUsedAt DateTime?
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usages ApiUsage[]
+  @@index([userId, active])
+  @@index([keyPrefix])
+}
+
+model ApiUsage {
+  id String @id @default(cuid())
+  apiKeyId String
+  endpoint String
+  method String
+  statusCode Int
+  responseTime Int
+  createdAt DateTime @default(now())
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  @@index([apiKeyId, createdAt])
+  @@index([createdAt])
+}
+
+model SubscriptionPlan {
+  id String @id @default(cuid())
+  name String @unique
+  monthlyRequestLimit Int
+  price Decimal @db.Decimal(10,2)
+  features Json
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id String @id @default(cuid())
+  userId String
+  planId String
+  status SubscriptionStatus @default(ACTIVE)
+  startedAt DateTime @default(now())
+  expiresAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  @@index([userId, status])
+}
+
+model Review {
+  id String @id @default(cuid())
+  userId String
+  locationId String
+  rating Int
+  comment String? @db.Text
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@unique([userId, locationId])
+  @@index([locationId, createdAt])
+}
+
+model Incident {
+  id String @id @default(cuid())
+  locationId String
+  type IncidentType
+  description String @db.Text
+  active Boolean @default(true)
+  startedAt DateTime @default(now())
+  endedAt DateTime?
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@index([locationId, active])
+}
+
+model RefreshToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  replacedById String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, expiresAt])
+}

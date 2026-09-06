@@ -1,0 +1,1 @@
+export function GenericPage({title,description}:{title:string;description:string}){return <><div className="page-head"><div><h1>{title}</h1><p>{description}</p></div></div><div className="card"><p>This section uses the QueueSense role-aware backend. Administrative operations are available through the protected <code>/api/v1/admin</code> endpoints and Swagger.</p></div></>}

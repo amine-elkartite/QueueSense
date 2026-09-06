@@ -1,0 +1,10 @@
+import {Router} from 'express';import {locationController} from '../controllers/location.controller.js';import {requireAuth} from '../middleware/auth.js';import {requireApiKey} from '../middleware/apiKey.js';import {allowRoles} from '../middleware/roles.js';import {asyncHandler} from '../utils/asyncHandler.js';import {validate} from '../middleware/validate.js';import {queueUpdateSchema} from '../validators/queue.validators.js';import {searchSchema} from '../validators/location.validators.js';
+export const locationRouter=Router();
+locationRouter.get('/search',requireApiKey,validate(searchSchema),asyncHandler(locationController.search));
+locationRouter.get('/nearby',requireApiKey,validate(searchSchema),asyncHandler(locationController.nearby));
+locationRouter.get('/:id/best-time',requireApiKey,asyncHandler(locationController.best));
+locationRouter.get('/:id/history',requireApiKey,asyncHandler(locationController.history));
+locationRouter.get('/:id',requireApiKey,asyncHandler(locationController.get));
+locationRouter.patch('/:id',requireAuth,allowRoles('BUSINESS','ADMIN'),asyncHandler(locationController.update));
+locationRouter.delete('/:id',requireAuth,allowRoles('BUSINESS','ADMIN'),asyncHandler(locationController.remove));
+locationRouter.post('/:locationId/queue',requireAuth,allowRoles('BUSINESS','ADMIN'),validate(queueUpdateSchema),asyncHandler(locationController.queue));
