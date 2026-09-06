@@ -1,13 +1,60 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "mysql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum Role { ADMIN BUSINESS DEVELOPER }
-enum UserStatus { ACTIVE SUSPENDED DISABLED }
-enum CrowdLevel { LOW MODERATE HIGH VERY_HIGH }
-enum QueueSource { BUSINESS SYSTEM ADMIN SENSOR }
-enum PredictionType { CURRENT IN_30_MIN IN_1_HOUR CUSTOM }
-enum SubscriptionStatus { ACTIVE CANCELED EXPIRED PAST_DUE }
-enum IncidentType { OUTAGE STAFF_SHORTAGE EMERGENCY CLOSURE HIGH_DEMAND OTHER }
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  BUSINESS
+  DEVELOPER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum CrowdLevel {
+  LOW
+  MODERATE
+  HIGH
+  VERY_HIGH
+}
+
+enum QueueSource {
+  BUSINESS
+  SYSTEM
+  ADMIN
+  SENSOR
+}
+
+enum PredictionType {
+  CURRENT
+  IN_30_MIN
+  IN_1_HOUR
+  CUSTOM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  PAST_DUE
+}
+
+enum IncidentType {
+  OUTAGE
+  STAFF_SHORTAGE
+  EMERGENCY
+  CLOSURE
+  HIGH_DEMAND
+  OTHER
+}
 
 model User {
   id String @id @default(cuid())

@@ -1,1 +1,1 @@
-import{describe,it,expect}from'vitest';import{haversineKm}from'../src/utils/geo';describe('nearby locations',()=>{it('computes geographic distance',()=>{const km=haversineKm(34.2167,-4.0167,34.0331,-5.0003);expect(km).toBeGreaterThan(80);expect(km).toBeLessThan(120)})});
+import{describe,it,expect}from'vitest';import{haversineKm}from'../src/utils/geo.js';describe('nearby locations',()=>{it('computes geographic distance',()=>{const km=haversineKm(34.2167,-4.0167,34.0331,-5.0003);expect(km).toBeGreaterThan(80);expect(km).toBeLessThan(120)})});
